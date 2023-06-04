@@ -1,4 +1,4 @@
-NCMconverter:
+NCMConverter:
 	go build -o $@
 clean:
 	-rm ./*.ncm

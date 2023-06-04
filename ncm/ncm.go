@@ -1,4 +1,4 @@
-//Package ncm reads ncm file into memory, and cut it into different parts.
+// Package ncm reads ncm file into memory, and cut it into different parts.
 package ncm
 
 import (
@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/closetool/NCMconverter/path"
+	"github.com/Arvintian/NCMconverter/path"
 )
 
 const (

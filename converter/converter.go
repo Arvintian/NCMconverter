@@ -7,7 +7,7 @@ import (
 	"math"
 	"sync"
 
-	"github.com/closetool/NCMconverter/ncm"
+	"github.com/Arvintian/NCMconverter/ncm"
 )
 
 var (

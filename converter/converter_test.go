@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/closetool/NCMconverter/ncm"
+	"github.com/Arvintian/NCMconverter/ncm"
 )
 
 var nf *ncm.NcmFile

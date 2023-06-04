@@ -6,29 +6,28 @@ import (
 	"os"
 	"strings"
 
-	"github.com/closetool/NCMconverter/converter"
-	"github.com/closetool/NCMconverter/ncm"
-	"github.com/closetool/NCMconverter/path"
-	"github.com/closetool/NCMconverter/tag"
+	"github.com/Arvintian/NCMconverter/converter"
+	"github.com/Arvintian/NCMconverter/ncm"
+	"github.com/Arvintian/NCMconverter/path"
+	"github.com/Arvintian/NCMconverter/tag"
 	"github.com/urfave/cli/v2"
 	"github.com/xxjwxc/gowp/workpool"
 )
 
-var version = "0.1.0"
+var version = "1.0.0"
 var cmd = struct {
 	output string
 	tag    bool
-	deepth int
 	thread int
 }{}
 var pool *workpool.WorkPool
 
 func main() {
 	app := &cli.App{
-		Name:  "NCM Parser",
+		Name:  "NCMConverter",
 		Usage: "convert ncm file to mp3 or flac format",
 		Authors: []*cli.Author{
-			{Name: "closetool", Email: "4closetool3@gmail.com"},
+			{Name: "Arvin", Email: "arvintian8@gmail.com"},
 		},
 		Version: version,
 		Flags: []cli.Flag{
@@ -45,13 +44,6 @@ func main() {
 				Value:       true,
 				Usage:       "if adding tag to music file",
 				Destination: &cmd.tag,
-			},
-			&cli.IntFlag{
-				Name:        "deepth",
-				Aliases:     []string{"d"},
-				Value:       0,
-				Usage:       "max deepth the program will find",
-				Destination: &cmd.deepth,
 			},
 			&cli.IntFlag{
 				Name:        "thread",
@@ -85,16 +77,10 @@ func action(c *cli.Context) error {
 	}
 
 	args := c.Args().Slice()
-	//if runtime.GOOS == "windows" {
-	//	outputDir = filepath.Clean(outputDir)
-	//} else {
-	//	outputDir = path.Clean(outputDir)
-	//}
 
 	cmd.output = path.Clean(cmd.output)
 	pool = workpool.New(cmd.thread)
 
-	//files := make([]strings, 0)
 	res, err := resolvePath(args)
 	if err != nil {
 		log.Printf("resolving file path failed: %v", err)
@@ -106,6 +92,8 @@ func action(c *cli.Context) error {
 			err := convert(p, cmd.output)
 			if err != nil {
 				log.Printf("Convert %v failed: %v", p, err)
+			} else {
+				log.Printf("Convert %s success", p)
 			}
 			return nil
 		})
@@ -123,7 +111,7 @@ func resolvePath(args []string) ([]string, error) {
 			continue
 		}
 		if info.IsDir() {
-			res, err = findNCMInDir(arg, cmd.deepth)
+			res, err = findNCMInDir(arg)
 			if err != nil {
 				log.Printf("find ncm file in %s failed: %v", arg, err)
 			}
@@ -158,12 +146,6 @@ func convert(filePath, dir string) error {
 	}
 
 	fileName := strings.Split(cv.FileName, cv.Ext)
-
-	//if runtime.GOOS == "windows" {
-	//	dir = filepath.Join(dir, fileName[0]+"."+cv.MetaData.Format)
-	//} else {
-	//	dir = path.Join(dir, fileName[0]+"."+cv.MetaData.Format)
-	//}
 	dir = path.Join(dir, fileName[0]+"."+cv.MetaData.Format)
 
 	err = writeToFile(dir, cv.MusicData)
@@ -206,10 +188,7 @@ func Tag(path string, imageData []byte, meta *converter.Meta) error {
 	return err
 }
 
-func findNCMInDir(dir string, deepth int) ([]string, error) {
-	if deepth <= 0 {
-		return nil, nil
-	}
+func findNCMInDir(dir string) ([]string, error) {
 	infos, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, err
@@ -218,7 +197,7 @@ func findNCMInDir(dir string, deepth int) ([]string, error) {
 	res := make([]string, 0)
 	for _, info := range infos {
 		if info.IsDir() {
-			tmp, _ := findNCMInDir(path.Join(dir, info.Name()), deepth-1)
+			tmp, _ := findNCMInDir(path.Join(dir, info.Name()))
 			if tmp != nil {
 				res = append(res, tmp...)
 			}
